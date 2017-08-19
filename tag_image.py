@@ -107,7 +107,7 @@ def create_graph():
         graph_def.ParseFromString(f.read())
         _ = tf.import_graph_def(graph_def, name='')
 
-def tag_image(image):
+def tag_image(tf_session, image):
     """Assign tags to an image.
 
     Args:
@@ -121,8 +121,8 @@ def tag_image(image):
 
     create_graph()
 
-    softmax_tensor = tf.Session().graph.get_tensor_by_name('softmax:0')
-    predictions = tf.Session().run(softmax_tensor, {'DecodeJpeg/contents:0': image_data})
+    softmax_tensor = tf_session.graph.get_tensor_by_name('softmax:0')
+    predictions = tf_session.run(softmax_tensor, {'DecodeJpeg/contents:0': image_data})
     predictions = np.squeeze(predictions)
 
     node_lookup = NodeLookup()
@@ -134,8 +134,9 @@ def tag_image(image):
 
 
 def main():
-    tags = tag_image('/home/vitords/Projects/TOMIS/data/img/S3Z9shXOBCI.jpg')
-    print(tags)
+    with tf.Session() as tf_session:
+        tags = tag_image(tf_session, '/home/vitords/Projects/TOMIS/data/img/S3Z9shXOBCI.jpg')
+        print(tags)
 
 
 if __name__ == '__main__':
