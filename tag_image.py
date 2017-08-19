@@ -105,7 +105,8 @@ def create_graph():
     with tf.gfile.FastGFile(os.path.join(MODEL_DIR, 'classify_image_graph_def.pb'), 'rb') as f:
         graph_def = tf.GraphDef()
         graph_def.ParseFromString(f.read())
-        _ = tf.import_graph_def(graph_def, name='')
+        tf.import_graph_def(graph_def, name='')
+
 
 def tag_image(tf_session, image):
     """Assign tags to an image.
@@ -129,13 +130,13 @@ def tag_image(tf_session, image):
 
     top_pred = predictions.argsort()[-NUM_TAGS:][::-1]
     tags = [node_lookup.id_to_string(node_id) for node_id in top_pred]
-    
+
     return tags
 
 
 def main():
     with tf.Session() as tf_session:
-        tags = tag_image(tf_session, '/home/vitords/Projects/TOMIS/data/img/S3Z9shXOBCI.jpg')
+        tags = tag_image(tf_session, sys.argv[1])
         print(tags)
 
 
