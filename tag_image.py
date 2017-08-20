@@ -13,9 +13,9 @@ import numpy as np
 import tensorflow as tf
 
 DATA_URL = 'http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz'
-MODEL_DIR = '/tmp/tfmodel'
+MODEL_DIR = 'tmp/tfmodel'
 
-NUM_TAGS = 10
+NUM_TAGS = 5
 
 
 def download_model_if_necessary():
@@ -117,7 +117,6 @@ def tag_image(tf_session, image):
     Returns:
       list of tags.
     """
-    download_model_if_necessary()
     image_data = tf.gfile.FastGFile(image, 'rb').read()
 
     create_graph()
@@ -135,6 +134,8 @@ def tag_image(tf_session, image):
 
 
 def main():
+    download_model_if_necessary()
+
     with tf.Session() as tf_session:
         tags = tag_image(tf_session, sys.argv[1])
         print(tags)
