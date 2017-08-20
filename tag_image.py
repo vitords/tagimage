@@ -13,7 +13,7 @@ import numpy as np
 import tensorflow as tf
 
 DATA_URL = 'http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz'
-MODEL_DIR = 'tmp/tfmodel'
+MODEL_DIR = 'data/tfmodel'
 
 NUM_TAGS = 5
 
