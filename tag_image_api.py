@@ -10,7 +10,7 @@ IMG_DIR = 'data/img/'
 
 app = flask.Flask(__name__)
 
-# Start a persisten TensorFlow session
+# Start a persistent TensorFlow session
 tf_session = tf.Session()
 
 
