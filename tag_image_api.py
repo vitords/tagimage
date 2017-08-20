@@ -1,3 +1,5 @@
+import os.path
+
 import flask
 import json
 import requests
@@ -5,10 +7,16 @@ import requests
 import tensorflow as tf
 from tag_image import tag_image, download_model_if_necessary
 
+from database import Database
+
 
 IMG_DIR = 'data/img/'
 
+if not os.path.exists(IMG_DIR):
+    os.makedirs(IMG_DIR)
+
 app = flask.Flask(__name__)
+database = Database()
 
 # Start a persistent TensorFlow session
 tf_session = tf.Session()
@@ -36,7 +44,13 @@ def tag():
     return json.dumps({'image_url': img_url, 'tags': tags})
 
 
-if __name__ == '__main__':
+def main():
     # If there is no TensorFlow model, download it and set it up
     download_model_if_necessary()
     app.run()
+
+    database.close()
+
+
+if __name__ == '__main__':
+    main()
