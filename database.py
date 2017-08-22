@@ -82,6 +82,20 @@ class Database(object):
 
         self.connection.commit()
 
+    def select_urls(self):
+        """Select all image URLs saved in the database.
+
+        Returns:
+            dict of video IDs and corresponding image URLs
+        """
+        cursor = self.connection.cursor()
+        query = "SELECT id, thumbnail FROM videos;"
+
+        urls = cursor.execute(query).fetchall()
+        urls = {video_id: url for (video_id, url) in urls}
+
+        return urls
+
     def close(self):
         """Close the connection with the database."""
         self.connection.close()
