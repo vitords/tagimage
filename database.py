@@ -6,9 +6,9 @@ class Database(object):
 
     def __init__(self):
         self.connection = sqlite3.connect('data/youtube.db')
-        self._create()
+        self.__create()
 
-    def _create(self):
+    def __create(self):
         """Create the database tables.
 
         If a table already exists, does nothing.
@@ -70,13 +70,14 @@ class Database(object):
             video_id: the ID of the video.
             tags: the tags to be associated with the video.l
         """
-        for tag in tags:
-            insert_query = 'INSERT OR IGNORE INTO tags (tag) VALUES (?)'
-
-            self.connection.execute(insert_query, (tag))
-
         cursor = self.connection.cursor()
-        update_query = 'UPDATE videos SET tag1 = ?, tag2 = ?, tag3 = ?, tag4 = ?, tag5 = ? WHERE id = ?)'
+
+        for tag in tags:
+            insert_query = 'INSERT OR IGNORE INTO tags (tag) VALUES (?);'
+
+            cursor.execute(insert_query, [tag])
+
+        update_query = 'UPDATE videos SET tag1 = ?, tag2 = ?, tag3 = ?, tag4 = ?, tag5 = ? WHERE id = ?;'
 
         cursor.execute(update_query, (tags[0], tags[1], tags[2], tags[3], tags[4], video_id))
 
