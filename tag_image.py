@@ -99,46 +99,53 @@ class NodeLookup(object):
         return self.node_lookup[node_id]
 
 
-def create_graph():
-    """Create a graph from saved GraphDef file and returns a saver."""
-    # Creates graph from saved graph_def.pb.
-    with tf.gfile.FastGFile(os.path.join(MODEL_DIR, 'classify_image_graph_def.pb'), 'rb') as f:
-        graph_def = tf.GraphDef()
-        graph_def.ParseFromString(f.read())
-        tf.import_graph_def(graph_def, name='')
+class ImageTagger(object):
+    """A class for handling classification of images."""
 
+    def __init__(self):
+        self.__create_graph()
+        self.tf_session = tf.Session()
+        self.node_lookup = NodeLookup()
 
-def tag_image(tf_session, image):
-    """Assign tags to an image.
+    def __create_graph(self):
+        """Create a graph from saved GraphDef file."""
+        # Creates graph from saved graph_def.pb.
+        with tf.gfile.FastGFile(os.path.join(MODEL_DIR, 'classify_image_graph_def.pb'), 'rb') as f:
+            graph_def = tf.GraphDef()
+            graph_def.ParseFromString(f.read())
+            tf.import_graph_def(graph_def, name='')
 
-    Args:
-      image: Image file name.
+    def terminate(self):
+        self.tf_session.close()
 
-    Returns:
-      list of tags.
-    """
-    image_data = tf.gfile.FastGFile(image, 'rb').read()
+    def tag_image(self, image):
+        """Assign tags to an image.
 
-    create_graph()
+        Args:
+          image: Image file name.
 
-    softmax_tensor = tf_session.graph.get_tensor_by_name('softmax:0')
-    predictions = tf_session.run(softmax_tensor, {'DecodeJpeg/contents:0': image_data})
-    predictions = np.squeeze(predictions)
+        Returns:
+          list of tags.
+        """
+        print('Starting tag_image()')
+        image_data = tf.gfile.FastGFile(image, 'rb').read()
 
-    node_lookup = NodeLookup()
+        softmax_tensor = self.tf_session.graph.get_tensor_by_name('softmax:0')
+        predictions = self.tf_session.run(softmax_tensor, {'DecodeJpeg/contents:0': image_data})
+        predictions = np.squeeze(predictions)
 
-    top_pred = predictions.argsort()[-NUM_TAGS:][::-1]
-    tags = [node_lookup.id_to_string(node_id) for node_id in top_pred]
+        top_pred = predictions.argsort()[-NUM_TAGS:][::-1]
+        tags = [self.node_lookup.id_to_string(node_id) for node_id in top_pred]
 
-    return tags
+        return tags
 
 
 def main():
     download_model_if_necessary()
 
-    with tf.Session() as tf_session:
-        tags = tag_image(tf_session, sys.argv[1])
-        print(tags)
+    it = ImageTagger(tf.Session())
+    tags = it.tag_image(sys.argv[1])
+    print(tags)
 
 
 if __name__ == '__main__':
