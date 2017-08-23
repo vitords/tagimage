@@ -16,24 +16,24 @@ class Database(object):
         cursor = self.connection.cursor()
 
         query = '''CREATE TABLE IF NOT EXISTS videos (
-                id          INT         NOT NULL    PRIMARY KEY,
+                id          CHAR(12)    NOT NULL    PRIMARY KEY,
                 title       TEXT        NOT NULL,
                 description TEXT        NOT NULL,
                 thumbnail   TEXT        NOT NULL,
                 channel     CHAR(40)    NOT NULL,
                 country     CHAR(2)     NOT NULL,
-                tag1        INT,
-                tag2        INT,
-                tag3        INT,
-                tag4        INT,
-                tag5        INT,
+                tag1        INTEGER,
+                tag2        INTEGER,
+                tag3        INTEGER,
+                tag4        INTEGER,
+                tag5        INTEGER,
                 FOREIGN KEY (tag1, tag2, tag3, tag4, tag5) REFERENCES tags (id, id, id, id, id)
                 );
                 '''
         cursor.execute(query)
 
         query = '''CREATE TABLE IF NOT EXISTS tags (
-                id          INT         NOT NULL    PRIMARY KEY,
+                id          INTEGER     PRIMARY KEY     AUTOINCREMENT,
                 tag         TEXT        NOT NULL,
                 UNIQUE(tag)
                 );
@@ -72,14 +72,23 @@ class Database(object):
         """
         cursor = self.connection.cursor()
 
+        tag_ids = []
         for tag in tags:
             insert_query = 'INSERT OR IGNORE INTO tags (tag) VALUES (?);'
+            cursor.execute(insert_query, (tag, ))
+            cursor.execute('SELECT id FROM tags WHERE tag = ?', (tag, ))
+            if cursor.fetchone is None:
+                tag_ids.append(cursor.lastrowid)
+            else:
+                tag_ids.append(cursor.fetchone()[0])
 
-            cursor.execute(insert_query, [tag])
+        self.connection.commit()
+
+        values = tag_ids
+        values.append(video_id)
 
         update_query = 'UPDATE videos SET tag1 = ?, tag2 = ?, tag3 = ?, tag4 = ?, tag5 = ? WHERE id = ?;'
-
-        cursor.execute(update_query, (tags[0], tags[1], tags[2], tags[3], tags[4], video_id))
+        cursor.execute(update_query, values)
 
         self.connection.commit()
 
