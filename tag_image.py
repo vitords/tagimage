@@ -115,7 +115,8 @@ class ImageTagger(object):
             graph_def.ParseFromString(f.read())
             tf.import_graph_def(graph_def, name='')
 
-    def terminate(self):
+    def close(self):
+        """Close TensorFlow session."""
         self.tf_session.close()
 
     def tag_image(self, image):
@@ -127,7 +128,6 @@ class ImageTagger(object):
         Returns:
           list of tags.
         """
-        print('Starting tag_image()')
         image_data = tf.gfile.FastGFile(image, 'rb').read()
 
         softmax_tensor = self.tf_session.graph.get_tensor_by_name('softmax:0')
