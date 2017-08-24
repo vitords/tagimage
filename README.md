@@ -7,7 +7,7 @@ Everything is done via REST requests, and there is a world map visualization tha
 ## Installation
 ```
 $ git clone https://github.com/vitords/tagimage.git
-$ virtualenv tagimage 
+$ virtualenv tagimage -p <your python3 path>
 $ cd tagimage
 $ source bin/activate
 $ pip install --upgrade -r requirements.txt
