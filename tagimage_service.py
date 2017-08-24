@@ -1,29 +1,26 @@
 import os.path
 
 import flask
-# import json
 import requests
 
-# import tensorflow as tf
 from tag_image import ImageTagger, download_model_if_necessary
 
 from get_youtube_data import get_youtube_data
 
 from database import Database
 
+import gmplot
+
 
 IMG_DIR = 'data/img/'
-
 if not os.path.exists(IMG_DIR):
     os.makedirs(IMG_DIR)
-
 
 # If there is no TensorFlow model, download it and set it up
 download_model_if_necessary()
 
 app = flask.Flask(__name__)
 db = Database()
-
 
 it = ImageTagger()
 
@@ -75,6 +72,21 @@ def search():
 
     # Request was successful, returns NO CONTENT message
     return '', 204
+
+
+@app.route('/visualize', methods=['GET'])
+def visualize():
+    """Visualize tags in a world map."""
+    lat, lng = gmplot.GoogleMapPlotter.geocode('US')
+
+    tags = db.select_tags()
+    tags = [[country, tagset] for country, tagset in tags.items()]
+
+    for tag in tags:
+        lat, lng = gmplot.GoogleMapPlotter.geocode(tag[0])
+        tag.append([lat, lng])
+
+    return flask.render_template('map.html', tag_markers=tags)
 
 
 def main():
