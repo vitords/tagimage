@@ -99,12 +99,38 @@ class Database(object):
             dict of video IDs and corresponding image URLs
         """
         cursor = self.connection.cursor()
-        query = "SELECT id, thumbnail FROM videos;"
+        query = 'SELECT id, thumbnail FROM videos;'
 
         urls = cursor.execute(query).fetchall()
         urls = {video_id: url for (video_id, url) in urls}
 
         return urls
+
+    def select_tags(self):
+        """Select the country and tags for each entry.
+
+        Returns:
+            dict in the format {'country code': [list of tags]}
+        """
+        cursor = self.connection.cursor()
+        query = """SELECT v.country, t1.tag, t2.tag, t3.tag, t4.tag, t5.tag
+                FROM videos AS v
+                LEFT JOIN tags AS t1 ON v.tag1 = t1.id
+                LEFT JOIN tags AS t2 ON v.tag2 = t2.id
+                LEFT JOIN tags AS t3 ON v.tag3 = t3.id
+                LEFT JOIN tags AS t4 ON v.tag4 = t4.id
+                LEFT JOIN tags AS t5 ON v.tag5 = t5.id
+                ORDER BY v.country;"""
+        tags = cursor.execute(query).fetchall()
+        tags_dict = {}
+        for (country, tag1, tag2, tag3, tag4, tag5) in tags:
+            tags_dict.setdefault(country, []).append(tag1)
+            tags_dict.setdefault(country, []).append(tag2)
+            tags_dict.setdefault(country, []).append(tag3)
+            tags_dict.setdefault(country, []).append(tag4)
+            tags_dict.setdefault(country, []).append(tag5)
+
+        return tags_dict
 
     def close(self):
         """Close the connection with the database."""
